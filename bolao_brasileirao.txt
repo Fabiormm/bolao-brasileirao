@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Bolão Brasileirão 2025</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+    .tab {
+      background: #d9d9d9;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .tab.active {
+      background: #003366;
+      color: #fff;
+      font-weight: bold;
+    }
+    .rodada {
+      display: none;
+    }
+    .rodada.active {
+      display: block;
+    }
+    .jogo {
+      background: #fff;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .jogo span {
+      display: inline-block;
+      width: 100px;
+      text-align: center;
+    }
+    .contador {
+      font-size: 12px;
+      color: #999;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bolão Brasileirão 2025</h1>
+  <div class="tabs" id="tabs"></div>
+  <div id="conteudoRodadas"></div>
+
+  <script>
+    const apiKey = 'f56e51b6c9msha481a61c688daabp1d56f1jsnf37bc99100fb';
+
+    async function buscarJogos() {
+      const resposta = await fetch('https://api-football-v1.p.rapidapi.com/v3/fixtures?league=71&season=2025', {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-host': 'api-football-v1.p.rapidapi.com',
+          'x-rapidapi-key': apiKey
+        }
+      });
+      const dados = await resposta.json();
+      organizarRodadas(dados.response);
+    }
+
+    function organizarRodadas(jogos) {
+      const rodadas = {};
+
+      jogos.forEach(jogo => {
+        const rodada = jogo.league.round;
+        if (!rodadas[rodada]) rodadas[rodada] = [];
+        rodadas[rodada].push(jogo);
+      });
+
+      const tabs = document.getElementById('tabs');
+      const conteudo = document.getElementById('conteudoRodadas');
+
+      Object.keys(rodadas).forEach((nomeRodada, idx) => {
+        const idRodada = 'rodada' + idx;
+
+        const botao = document.createElement('div');
+        botao.className = 'tab' + (idx === 0 ? ' active' : '');
+        botao.innerText = nomeRodada;
+        botao.onclick = () => {
+          document.querySelectorAll('.rodada').forEach(r => r.classList.remove('active'));
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          document.getElementById(idRodada).classList.add('active');
+          botao.classList.add('active');
+        };
+        tabs.appendChild(botao);
+
+        const rodadaDiv = document.createElement('div');
+        rodadaDiv.id = idRodada;
+        rodadaDiv.className = 'rodada' + (idx === 0 ? ' active' : '');
+
+        rodadas[nomeRodada].forEach(jogo => {
+          const timeA = jogo.teams.home.name;
+          const timeB = jogo.teams.away.name;
+          const logoA = jogo.teams.home.logo;
+          const logoB = jogo.teams.away.logo;
+          const data = new Date(jogo.fixture.date);
+          const placar = jogo.goals.home !== null ? `${jogo.goals.home} x ${jogo.goals.away}` : 'vs';
+
+          const jogoDiv = document.createElement('div');
+          jogoDiv.className = 'jogo';
+          jogoDiv.innerHTML = `
+            <img src="${logoA}" alt="${timeA}" height="20"> ${timeA}
+            <strong> ${placar} </strong>
+            ${timeB} <img src="${logoB}" alt="${timeB}" height="20">
+            <div class="contador" data-time="${data.toISOString()}"></div>
+          `;
+          rodadaDiv.appendChild(jogoDiv);
+        });
+
+        conteudo.appendChild(rodadaDiv);
+      });
+
+      iniciarContador();
+    }
+
+    function iniciarContador() {
+      setInterval(() => {
+        document.querySelectorAll('.contador').forEach(el => {
+          const horario = new Date(el.getAttribute('data-time'));
+          const agora = new Date();
+          const diff = horario - agora;
+
+          if (diff <= 0) {
+            el.innerText = 'Jogo iniciado ou finalizado';
+          } else {
+            const horas = Math.floor(diff / 3600000);
+            const minutos = Math.floor((diff % 3600000) / 60000);
+            const segundos = Math.floor((diff % 60000) / 1000);
+            el.innerText = `Começa em ${horas}h ${minutos}m ${segundos}s`;
+          }
+        });
+      }, 1000);
+    }
+
+    buscarJogos();
+  </script>
+</body>
+</html>
