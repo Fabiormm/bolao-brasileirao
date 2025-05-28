@@ -1,149 +1,86 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bolão Brasileirão 2025</title>
+  <meta charset="UTF-8">
+  <title>Bolão Série B</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
+      background: #f5f5f5;
       margin: 0;
-      padding: 1rem;
-      background: #f4f4f4;
-      color: #333;
+      padding: 20px;
     }
     h1 {
       text-align: center;
-      color: #006400;
-    }
-    .rodadas {
-      display: flex;
-      overflow-x: auto;
-      gap: 10px;
-      padding: 10px;
-    }
-    .rodada-btn {
-      padding: 8px 12px;
-      background-color: #ddd;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .rodada-btn.active {
-      background-color: #006400;
-      color: white;
-    }
-    .jogos {
-      margin-top: 20px;
+      color: #2c3e50;
     }
     .jogo {
-      background-color: white;
-      padding: 10px;
-      margin-bottom: 10px;
+      background: white;
       border-radius: 10px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin: 10px auto;
+      padding: 15px;
+      max-width: 600px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .contador {
-      font-size: 1rem;
+    .time {
+      text-align: center;
+      flex: 1;
+    }
+    .vs {
       font-weight: bold;
-      color: #d00;
+      color: #555;
+      margin: 0 10px;
+    }
+    .info {
+      text-align: center;
+      font-size: 14px;
+      color: #777;
       margin-top: 5px;
     }
   </style>
 </head>
 <body>
-  <h1>Bolão Brasileirão 2025</h1>
-  <div class="rodadas" id="rodadas"></div>
-  <div class="jogos" id="jogos"></div>
+
+  <h1>Jogos da 1ª Rodada - Série B</h1>
+  <div id="jogos-container">Carregando jogos...</div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbw8vm_CKFsuUYoU2pWvWAZv9no7bbbVx78OIdEThJYnkzpBpACY7ALXjqgQGEYhmetM/exec";
+    // Substitua pela URL do seu script
+    const scriptUrl = "https://script.google.com/macros/s/SUA_URL_DO_SCRIPT/exec?rodada=1";
 
-    let todasRodadas = [];
-    let rodadaAtual = 1;
+    fetch(scriptUrl)
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById("jogos-container");
+        container.innerHTML = ""; // limpa o "Carregando..."
 
-    function formatarData(dataStr) {
-      const data = new Date(dataStr);
-      return data.toLocaleString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    }
+        data.partidas.forEach(jogo => {
+          const mandante = jogo.time_mandante.nome_popular;
+          const visitante = jogo.time_visitante.nome_popular;
+          const dataHora = new Date(jogo.data_realizacao_iso);
+          const dia = dataHora.toLocaleDateString();
+          const hora = dataHora.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-    function mostrarRodadas(rodadas) {
-      const rodadasDiv = document.getElementById("rodadas");
-      rodadasDiv.innerHTML = "";
-
-      rodadas.forEach((rodada, index) => {
-        const btn = document.createElement("button");
-        btn.className = "rodada-btn" + (index + 1 === rodadaAtual ? " active" : "");
-        btn.textContent = `Rodada ${index + 1}`;
-        btn.onclick = () => {
-          rodadaAtual = index + 1;
-          mostrarJogos(rodada);
-          document.querySelectorAll(".rodada-btn").forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-        };
-        rodadasDiv.appendChild(btn);
-      });
-    }
-
-    function mostrarJogos(jogos) {
-      const jogosDiv = document.getElementById("jogos");
-      jogosDiv.innerHTML = "";
-
-      jogos.forEach(jogo => {
-        const div = document.createElement("div");
-        div.className = "jogo";
-        const dataPartida = new Date(jogo.fixture.date);
-        const agora = new Date();
-
-        const tempoRestante = dataPartida - agora;
-        let contador = "";
-
-        if (tempoRestante > 0) {
-          const horas = Math.floor(tempoRestante / (1000 * 60 * 60));
-          const minutos = Math.floor((tempoRestante % (1000 * 60 * 60)) / (1000 * 60));
-          contador = `<div class="contador">Início em ${horas}h ${minutos}min</div>`;
-        }
-
-        div.innerHTML = `
-          <div><strong>${jogo.teams.home.name}</strong> vs <strong>${jogo.teams.away.name}</strong></div>
-          <div>Data: ${formatarData(jogo.fixture.date)}</div>
-          ${contador}
-        `;
-        jogosDiv.appendChild(div);
-      });
-    }
-
-    async function carregarRodadas() {
-      try {
-        const res = await fetch(API_URL);
-        const dados = await res.json();
-
-        // Supondo que o script retorne todos os jogos do campeonato
-        const jogos = dados.response;
-
-        // Agrupar por rodadas
-        const rodadasMap = {};
-        jogos.forEach(jogo => {
-          const rodada = jogo.league.round;
-          if (!rodadasMap[rodada]) rodadasMap[rodada] = [];
-          rodadasMap[rodada].push(jogo);
+          const jogoEl = document.createElement("div");
+          jogoEl.className = "jogo";
+          jogoEl.innerHTML = `
+            <div class="time">${mandante}</div>
+            <div class="vs">x</div>
+            <div class="time">${visitante}</div>
+            <div class="info">${dia} às ${hora}</div>
+          `;
+          container.appendChild(jogoEl);
         });
-
-        todasRodadas = Object.values(rodadasMap);
-        mostrarRodadas(todasRodadas);
-        mostrarJogos(todasRodadas[rodadaAtual - 1]);
-      } catch (err) {
-        console.error("Erro ao carregar dados:", err);
-        document.getElementById("jogos").innerHTML = "<p>Erro ao carregar dados da API.</p>";
-      }
-    }
-
-    carregarRodadas();
+      })
+      .catch(err => {
+        document.getElementById("jogos-container").innerText = "Erro ao carregar jogos.";
+        console.error(err);
+      });
   </script>
+
 </body>
 </html>
