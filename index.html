@@ -14,31 +14,25 @@
   <div id="jogos-container"></div>
 
   <script>
-    const rodada = "Rodada 1";
-    const scriptUrl = 'https://script.google.com/macros/s/AKfycbxUdU7xZARcFfbnQyWcRykOxCe2AAzNBWela2nxFdRJXGcPwQoWmYiSHrcChP-q5US9bA/exec';
+   const API_URL = 'https://script.google.com/macros/s/AKfycbxUdU7xZARcFfbnQyWcRykOxCe2AAzNBWela2nxFdRJXGcPwQoWmYiSHrcChP-q5US9bA/exec';
 
-    fetch(scriptUrl)
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("titulo").innerText = `Jogos da ${data.rodada}`;
-        const container = document.getElementById("jogos-container");
-        container.innerHTML = "";
+async function carregarJogos(rodadaSelecionada = "Rodada 1") {
+  try {
+    const response = await fetch(`${API_URL}?rodada=${encodeURIComponent(rodadaSelecionada)}`);
+    const dados = await response.json();
 
-        data.jogos.forEach(jogo => {
-          const el = document.createElement("div");
-          el.className = "jogo";
-          el.innerHTML = `
-            <div class="time">${jogo["Mandante"]} x ${jogo["Visitante"]}</div>
-            <div>${jogo["Data"]} às ${jogo["Hora"]}</div>
-            <div>Resultado: ${jogo["Gols Mandante"] || "-"} x ${jogo["Gols Visitante"] || "-"}</div>
-          `;
-          container.appendChild(el);
-        });
-      })
-      .catch(err => {
-        document.getElementById("jogos-container").innerText = "Erro ao carregar jogos.";
-        console.error(err);
-      });
+    if (!dados || !dados.jogos || dados.jogos.length === 0) {
+      document.getElementById('jogos').innerHTML = "<p>Nenhum jogo encontrado.</p>";
+      return;
+    }
+
+    exibirJogos(dados.jogos, rodadaSelecionada);
+  } catch (error) {
+    console.error('Erro ao carregar dados da API:', error);
+    document.getElementById('jogos').innerHTML = "<p>Erro ao carregar os jogos.</p>";
+  }
+}
+
   </script>
 </body>
 </html>
