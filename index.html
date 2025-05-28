@@ -1,128 +1,263 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bolão do Brasileirão - Série A</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bolão do Brasileirão</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f7f7f7;
-      margin: 0;
-      padding: 20px;
+      margin: 0; padding: 0;
+      background-color: #f4f4f4;
     }
-    h1 {
-      text-align: center;
-      color: #1c3d5a;
-    }
-    #rodadas {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-    .rodada-btn {
-      background: #1c3d5a;
+    header {
+      background-color: #1e3d59;
       color: white;
-      border: none;
-      padding: 10px 15px;
-      margin: 5px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    .rodada-btn:hover {
-      background: #2e5984;
-    }
-    #jogos {
-      max-width: 800px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    .jogo {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #ddd;
-      padding: 10px 0;
-    }
-    .jogo:last-child {
-      border-bottom: none;
-    }
-    .contador {
+      padding: 10px;
       text-align: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: row;
+    }
+    .sidebar {
+      width: 250px;
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    .sidebar img {
+      width: 100px;
+      margin-bottom: 10px;
+    }
+    .sidebar h2 {
       font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+    .sidebar p {
+      margin: 5px 0;
+      font-weight: bold;
+    }
+    .sidebar a {
+      display: block;
+      margin: 10px 0;
+      color: #1e3d59;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .content {
+      flex: 1;
+      padding: 20px;
+    }
+    .tabs {
+      display: flex;
+      overflow-x: auto;
+      background-color: #ddd;
+      padding: 10px;
+    }
+    .tabs button {
+      background-color: #bbb;
+      border: none;
+      padding: 10px;
+      margin-right: 5px;
+      cursor: pointer;
+    }
+    .tabs button.active {
+      background-color: #1e3d59;
+      color: white;
+    }
+    .hidden {
+      display: none;
+    }
+    #escudoPreview {
       margin-top: 10px;
-      color: #d9534f;
+      max-height: 80px;
     }
   </style>
 </head>
 <body>
-  <h1>Bolão do Brasileirão - Série A</h1>
-  <div id="rodadas"></div>
-  <div id="jogos"></div>
+  <header>
+    <h1>Bolão do Brasileirão</h1>
+  </header>
+
+  <!-- Tela Cadastro -->
+  <div id="cadastro" class="content">
+    <h2>Cadastro</h2>
+    <input type="text" id="nome" placeholder="Seu nome" required /><br /><br />
+    <input type="password" id="senha" placeholder="Senha" required /><br /><br />
+    <select id="time" onchange="mostrarEscudoPreview()">
+      <option value="">Escolha seu time do coração</option>
+      <option value="Flamengo">Flamengo</option>
+      <option value="Palmeiras">Palmeiras</option>
+      <option value="Corinthians">Corinthians</option>
+      <!-- Adicione todos os times aqui -->
+    </select><br /><br />
+    <img id="escudoPreview" src="" alt="Prévia do escudo do time" style="display:none" /><br />
+    <button onclick="salvarCadastro()">Cadastrar</button>
+    <button onclick="mostrarLogin()">Já sou cadastrado - Login</button>
+  </div>
+
+  <!-- Tela Login -->
+  <div id="login" class="content hidden">
+    <h2>Login</h2>
+    <input type="text" id="loginNome" placeholder="Seu nome" required /><br /><br />
+    <input type="password" id="loginSenha" placeholder="Senha" required /><br /><br />
+    <button onclick="fazerLogin()">Entrar</button>
+    <button onclick="mostrarCadastro()">Ainda não tenho cadastro</button>
+  </div>
+
+  <!-- Tela Principal após login -->
+  <div class="container hidden" id="main">
+    <div class="sidebar">
+      <img id="escudoTime" src="" alt="Escudo do time" />
+      <h2 id="nomeUsuario"></h2>
+      <p id="pontuacaoUsuario">Pontuação: 0</p>
+      <p id="posicaoRanking">Posição no Ranking: 0º</p>
+      <a onclick="mostrarPagina('palpites')">Meus Palpites</a>
+      <a onclick="mostrarPagina('resultados')">Meus Resultados</a>
+      <a onclick="mostrarPagina('ranking')">Ranking</a>
+    </div>
+    <div class="content">
+      <div id="palpites" class="hidden">
+        <div class="tabs hidden" id="tabsRodadas"></div>
+        <div id="jogosRodada"></div>
+      </div>
+      <div id="resultados" class="hidden">
+        <h2>Resultados</h2>
+        <p>Seus resultados aparecerão aqui.</p>
+      </div>
+      <div id="ranking" class="hidden">
+        <h2>Ranking</h2>
+        <p>Ranking dos usuários será exibido aqui.</p>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxUdU7xZARcFfbnQyWcRykOxCe2AAzNBWela2nxFdRJXGcPwQoWmYiSHrcChP-q5US9bA/exec';
+    let usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
 
-    const totalRodadas = 3; // Altere conforme número de rodadas na planilha
+    function salvarCadastro() {
+      const nome = document.getElementById('nome').value.trim();
+      const senha = document.getElementById('senha').value;
+      const time = document.getElementById('time').value;
 
-    function criarBotoesRodadas() {
-      const container = document.getElementById("rodadas");
-      for (let i = 1; i <= totalRodadas; i++) {
-        const btn = document.createElement("button");
-        btn.className = "rodada-btn";
+      if (!nome || !senha || !time) {
+        alert('Preencha todos os campos!');
+        return;
+      }
+
+      if (usuarios.some(user => user.nome.toLowerCase() === nome.toLowerCase())) {
+        alert('Nome de usuário já cadastrado!');
+        return;
+      }
+
+      const usuario = { nome, senha, time, pontuacao: 0, ranking: 0 };
+      usuarios.push(usuario);
+      localStorage.setItem('usuarios', JSON.stringify(usuarios));
+      localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
+
+      carregarUsuario();
+    }
+
+    function fazerLogin() {
+      const nome = document.getElementById('loginNome').value.trim();
+      const senha = document.getElementById('loginSenha').value;
+
+      if (!nome || !senha) {
+        alert('Preencha todos os campos!');
+        return;
+      }
+
+      const usuario = usuarios.find(user => user.nome.toLowerCase() === nome.toLowerCase());
+      if (!usuario) {
+        alert('Usuário não encontrado!');
+        return;
+      }
+
+      if (usuario.senha !== senha) {
+        alert('Senha incorreta!');
+        return;
+      }
+
+      localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
+      carregarUsuario();
+    }
+
+    function mostrarLogin() {
+      document.getElementById('cadastro').classList.add('hidden');
+      document.getElementById('login').classList.remove('hidden');
+    }
+
+    function mostrarCadastro() {
+      document.getElementById('login').classList.add('hidden');
+      document.getElementById('cadastro').classList.remove('hidden');
+    }
+
+    function carregarUsuario() {
+      const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
+      if (!usuario) {
+        mostrarCadastro();
+        return;
+      }
+
+      document.getElementById('cadastro').classList.add('hidden');
+      document.getElementById('login').classList.add('hidden');
+      document.getElementById('main').classList.remove('hidden');
+      document.getElementById('nomeUsuario').innerText = usuario.nome;
+      document.getElementById('escudoTime').src = `https://cdn.escudosfc.com.br/images/times/${usuario.time.toLowerCase().replace(/ /g, '_')}.png`;
+      document.getElementById('pontuacaoUsuario').innerText = `Pontuação: ${usuario.pontuacao || 0}`;
+      document.getElementById('posicaoRanking').innerText = `Posição no Ranking: ${usuario.ranking || 0}º`;
+    }
+
+    function mostrarPagina(id) {
+      document.querySelectorAll('.content > div').forEach(div => div.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+      if (id === 'palpites') {
+        const tabs = document.getElementById('tabsRodadas');
+        if (tabs.children.length === 0) criarTabsRodadas();
+        tabs.classList.remove('hidden');
+      }
+    }
+
+    function criarTabsRodadas() {
+      const tabs = document.getElementById('tabsRodadas');
+      tabs.innerHTML = '';
+      for (let i = 1; i <= 38; i++) {
+        const btn = document.createElement('button');
         btn.textContent = `Rodada ${i}`;
-        btn.onclick = () => carregarJogos(`Rodada ${i}`);
-        container.appendChild(btn);
+        btn.onclick = () => selecionarRodada(i, btn);
+        tabs.appendChild(btn);
+      }
+      tabs.firstChild.classList.add('active');
+      selecionarRodada(1, tabs.firstChild);
+    }
+
+    function selecionarRodada(rodada, btn) {
+      document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('jogosRodada').innerHTML = `<h3>Jogos da Rodada ${rodada}</h3><p>Jogos ainda não cadastrados.</p>`;
+    }
+
+    function mostrarEscudoPreview() {
+      const time = document.getElementById('time').value;
+      const escudo = document.getElementById('escudoPreview');
+      if (time) {
+        escudo.src = `https://cdn.escudosfc.com.br/images/times/${time.toLowerCase().replace(/ /g, '_')}.png`;
+        escudo.style.display = 'block';
+      } else {
+        escudo.style.display = 'none';
       }
     }
 
-    async function carregarJogos(rodadaSelecionada = "Rodada 1") {
-      try {
-        const response = await fetch(`${API_URL}?rodada=${encodeURIComponent(rodadaSelecionada)}`);
-        const dados = await response.json();
-
-        if (!dados || !dados.jogos || dados.jogos.length === 0) {
-          document.getElementById('jogos').innerHTML = "<p>Nenhum jogo encontrado.</p>";
-          return;
-        }
-
-        exibirJogos(dados.jogos, rodadaSelecionada);
-      } catch (error) {
-        console.error('Erro ao carregar dados da API:', error);
-        document.getElementById('jogos').innerHTML = "<p>Erro ao carregar os jogos.</p>";
+    window.onload = () => {
+      const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
+      if (usuario) {
+        carregarUsuario();
+      } else {
+        mostrarCadastro();
       }
-    }
-
-    function exibirJogos(jogos, rodada) {
-      const container = document.getElementById("jogos");
-      container.innerHTML = `<h2>Jogos da ${rodada}</h2>`;
-      jogos.forEach(jogo => {
-        const dataHora = new Date(`${jogo.Data}T${jogo.Hora}`);
-        const agora = new Date();
-        const diff = dataHora - agora;
-
-        const horas = Math.floor(diff / (1000 * 60 * 60));
-        const minutos = Math.floor((diff / (1000 * 60)) % 60);
-
-        const contador = diff > 0
-          ? `<div class='contador'>Início em: ${horas}h ${minutos}min</div>`
-          : `<div class='contador'>Jogo iniciado ou finalizado</div>`;
-
-        container.innerHTML += `
-          <div class="jogo">
-            <div><strong>${jogo.Mandante}</strong> vs <strong>${jogo.Visitante}</strong></div>
-            <div>${jogo.Data} ${jogo.Hora}</div>
-          </div>
-          ${contador}
-        `;
-      });
-    }
-
-    criarBotoesRodadas();
-    carregarJogos();
+    };
   </script>
 </body>
 </html>
