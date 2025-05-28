@@ -1,39 +1,128 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-  <title>Bolão Série B</title>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bolão do Brasileirão - Série A</title>
   <style>
-    body { font-family: Arial; text-align: center; background: #f9f9f9; }
-    .jogo { margin: 10px auto; padding: 10px; width: 300px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .time { font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #1c3d5a;
+    }
+    #rodadas {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .rodada-btn {
+      background: #1c3d5a;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .rodada-btn:hover {
+      background: #2e5984;
+    }
+    #jogos {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .jogo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+    }
+    .jogo:last-child {
+      border-bottom: none;
+    }
+    .contador {
+      text-align: center;
+      font-size: 1.2em;
+      margin-top: 10px;
+      color: #d9534f;
+    }
   </style>
 </head>
 <body>
-  <h1 id="titulo">Jogos da Rodada</h1>
-  <div id="jogos-container"></div>
-
+  <h1>Bolão do Brasileirão - Série A</h1>
+  <div id="rodadas"></div>
+  <div id="jogos"></div>
   <script>
-   const API_URL = 'https://script.google.com/macros/s/AKfycbxUdU7xZARcFfbnQyWcRykOxCe2AAzNBWela2nxFdRJXGcPwQoWmYiSHrcChP-q5US9bA/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxUdU7xZARcFfbnQyWcRykOxCe2AAzNBWela2nxFdRJXGcPwQoWmYiSHrcChP-q5US9bA/exec';
 
-async function carregarJogos(rodadaSelecionada = "Rodada 1") {
-  try {
-    const response = await fetch(`${API_URL}?rodada=${encodeURIComponent(rodadaSelecionada)}`);
-    const dados = await response.json();
+    const totalRodadas = 3; // Altere conforme número de rodadas na planilha
 
-    if (!dados || !dados.jogos || dados.jogos.length === 0) {
-      document.getElementById('jogos').innerHTML = "<p>Nenhum jogo encontrado.</p>";
-      return;
+    function criarBotoesRodadas() {
+      const container = document.getElementById("rodadas");
+      for (let i = 1; i <= totalRodadas; i++) {
+        const btn = document.createElement("button");
+        btn.className = "rodada-btn";
+        btn.textContent = `Rodada ${i}`;
+        btn.onclick = () => carregarJogos(`Rodada ${i}`);
+        container.appendChild(btn);
+      }
     }
 
-    exibirJogos(dados.jogos, rodadaSelecionada);
-  } catch (error) {
-    console.error('Erro ao carregar dados da API:', error);
-    document.getElementById('jogos').innerHTML = "<p>Erro ao carregar os jogos.</p>";
-  }
-}
+    async function carregarJogos(rodadaSelecionada = "Rodada 1") {
+      try {
+        const response = await fetch(`${API_URL}?rodada=${encodeURIComponent(rodadaSelecionada)}`);
+        const dados = await response.json();
 
+        if (!dados || !dados.jogos || dados.jogos.length === 0) {
+          document.getElementById('jogos').innerHTML = "<p>Nenhum jogo encontrado.</p>";
+          return;
+        }
+
+        exibirJogos(dados.jogos, rodadaSelecionada);
+      } catch (error) {
+        console.error('Erro ao carregar dados da API:', error);
+        document.getElementById('jogos').innerHTML = "<p>Erro ao carregar os jogos.</p>";
+      }
+    }
+
+    function exibirJogos(jogos, rodada) {
+      const container = document.getElementById("jogos");
+      container.innerHTML = `<h2>Jogos da ${rodada}</h2>`;
+      jogos.forEach(jogo => {
+        const dataHora = new Date(`${jogo.Data}T${jogo.Hora}`);
+        const agora = new Date();
+        const diff = dataHora - agora;
+
+        const horas = Math.floor(diff / (1000 * 60 * 60));
+        const minutos = Math.floor((diff / (1000 * 60)) % 60);
+
+        const contador = diff > 0
+          ? `<div class='contador'>Início em: ${horas}h ${minutos}min</div>`
+          : `<div class='contador'>Jogo iniciado ou finalizado</div>`;
+
+        container.innerHTML += `
+          <div class="jogo">
+            <div><strong>${jogo.Mandante}</strong> vs <strong>${jogo.Visitante}</strong></div>
+            <div>${jogo.Data} ${jogo.Hora}</div>
+          </div>
+          ${contador}
+        `;
+      });
+    }
+
+    criarBotoesRodadas();
+    carregarJogos();
   </script>
 </body>
 </html>
-
