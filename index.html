@@ -49,38 +49,41 @@
   <div id="jogos-container">Carregando jogos...</div>
 
   <script>
-    // Substitua pela URL do seu script
-    const scriptUrl = "https://script.google.com/macros/s/AKfycbxbnDkZjR0_VJI9IyXpJ5RW6fCXAN5T0BC95supNMOKZPbPyKG_9sx0T-cuYp3ugcUe/exec";
+  const rodada = 1; // você pode trocar isso dinamicamente depois
+  const scriptUrl = `https://script.google.com/macros/s/AKfycbx3pCGXqOdJOdfndR03Y9dmsO34Hn7F2liTbTa8HUlVWkb557iNlmpqyvBXOuAXRp9K/exec?rodada=${rodada}`;
 
-    fetch(scriptUrl)
-      .then(res => res.json())
-      .then(data => {
-        const container = document.getElementById("jogos-container");
-        container.innerHTML = ""; // limpa o "Carregando..."
+  fetch(scriptUrl)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("titulo").innerText = `Jogos da ${data.rodada} - Série B`;
 
-        data.partidas.forEach(jogo => {
-          const mandante = jogo.time_mandante.nome_popular;
-          const visitante = jogo.time_visitante.nome_popular;
-          const dataHora = new Date(jogo.data_realizacao_iso);
-          const dia = dataHora.toLocaleDateString();
-          const hora = dataHora.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      const container = document.getElementById("jogos-container");
+      container.innerHTML = "";
 
-          const jogoEl = document.createElement("div");
-          jogoEl.className = "jogo";
-          jogoEl.innerHTML = `
-            <div class="time">${mandante}</div>
-            <div class="vs">x</div>
-            <div class="time">${visitante}</div>
-            <div class="info">${dia} às ${hora}</div>
-          `;
-          container.appendChild(jogoEl);
-        });
-      })
-      .catch(err => {
-        document.getElementById("jogos-container").innerText = "Erro ao carregar jogos.";
-        console.error(err);
+      (data.jogos || []).forEach(jogo => {
+        const mandante = jogo.time_mandante.nome_popular;
+        const visitante = jogo.time_visitante.nome_popular;
+        const dataHora = new Date(jogo.data_realizacao_iso);
+        const dia = dataHora.toLocaleDateString();
+        const hora = dataHora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const jogoEl = document.createElement("div");
+        jogoEl.className = "jogo";
+        jogoEl.innerHTML = `
+          <div class="time">${mandante}</div>
+          <div class="vs">x</div>
+          <div class="time">${visitante}</div>
+          <div class="info">${dia} às ${hora}</div>
+        `;
+        container.appendChild(jogoEl);
       });
-  </script>
+    })
+    .catch(err => {
+      console.error("Erro ao carregar jogos:", err);
+      document.getElementById("jogos-container").innerText = "Erro ao carregar os jogos.";
+    });
+</script>
+
 
 </body>
 </html>
