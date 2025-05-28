@@ -1,89 +1,45 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
-  <meta charset="UTF-8">
   <title>Bolão Série B</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      color: #2c3e50;
-    }
-    .jogo {
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      margin: 10px auto;
-      padding: 15px;
-      max-width: 600px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .time {
-      text-align: center;
-      flex: 1;
-    }
-    .vs {
-      font-weight: bold;
-      color: #555;
-      margin: 0 10px;
-    }
-    .info {
-      text-align: center;
-      font-size: 14px;
-      color: #777;
-      margin-top: 5px;
-    }
+    body { font-family: Arial; text-align: center; background: #f9f9f9; }
+    .jogo { margin: 10px auto; padding: 10px; width: 300px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .time { font-weight: bold; }
   </style>
 </head>
 <body>
-
-  <h1>Jogos da 1ª Rodada - Série B</h1>
-  <div id="jogos-container">Carregando jogos...</div>
+  <h1 id="titulo">Jogos da Rodada</h1>
+  <div id="jogos-container"></div>
 
   <script>
-  const rodada = 1; // você pode trocar isso dinamicamente depois
-  const scriptUrl = `https://script.google.com/macros/s/AKfycbx3pCGXqOdJOdfndR03Y9dmsO34Hn7F2liTbTa8HUlVWkb557iNlmpqyvBXOuAXRp9K/exec?rodada=${rodada}`;
+    const rodada = "Rodada 1";
+    const scriptUrl = "COLE_AQUI_SUA_URL_DA_API?rodada=" + encodeURIComponent(rodada);
 
-  fetch(scriptUrl)
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("titulo").innerText = `Jogos da ${data.rodada} - Série B`;
+    fetch(scriptUrl)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("titulo").innerText = `Jogos da ${data.rodada}`;
+        const container = document.getElementById("jogos-container");
+        container.innerHTML = "";
 
-      const container = document.getElementById("jogos-container");
-      container.innerHTML = "";
-
-      (data.jogos || []).forEach(jogo => {
-        const mandante = jogo.time_mandante.nome_popular;
-        const visitante = jogo.time_visitante.nome_popular;
-        const dataHora = new Date(jogo.data_realizacao_iso);
-        const dia = dataHora.toLocaleDateString();
-        const hora = dataHora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-        const jogoEl = document.createElement("div");
-        jogoEl.className = "jogo";
-        jogoEl.innerHTML = `
-          <div class="time">${mandante}</div>
-          <div class="vs">x</div>
-          <div class="time">${visitante}</div>
-          <div class="info">${dia} às ${hora}</div>
-        `;
-        container.appendChild(jogoEl);
+        data.jogos.forEach(jogo => {
+          const el = document.createElement("div");
+          el.className = "jogo";
+          el.innerHTML = `
+            <div class="time">${jogo["Mandante"]} x ${jogo["Visitante"]}</div>
+            <div>${jogo["Data"]} às ${jogo["Hora"]}</div>
+            <div>Resultado: ${jogo["Gols Mandante"] || "-"} x ${jogo["Gols Visitante"] || "-"}</div>
+          `;
+          container.appendChild(el);
+        });
+      })
+      .catch(err => {
+        document.getElementById("jogos-container").innerText = "Erro ao carregar jogos.";
+        console.error(err);
       });
-    })
-    .catch(err => {
-      console.error("Erro ao carregar jogos:", err);
-      document.getElementById("jogos-container").innerText = "Erro ao carregar os jogos.";
-    });
-</script>
-
-
+  </script>
 </body>
 </html>
+
