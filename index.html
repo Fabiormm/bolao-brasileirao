@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bolão do Brasileirão</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0; padding: 0;
+      margin: 0;
+      padding: 0;
       background-color: #f4f4f4;
     }
     header {
@@ -22,7 +23,7 @@
     }
     .sidebar {
       width: 250px;
-      background-color: #fff;
+      background-color: #ffffff;
       padding: 20px;
       box-shadow: 2px 0 5px rgba(0,0,0,0.1);
     }
@@ -80,37 +81,24 @@
   <header>
     <h1>Bolão do Brasileirão</h1>
   </header>
-
-  <!-- Tela Cadastro -->
   <div id="cadastro" class="content">
     <h2>Cadastro</h2>
-    <input type="text" id="nome" placeholder="Seu nome" required /><br /><br />
-    <input type="password" id="senha" placeholder="Senha" required /><br /><br />
+    <input type="text" id="nome" placeholder="Seu nome" required><br><br>
+    <input type="password" id="senha" placeholder="Senha" required><br><br>
     <select id="time" onchange="mostrarEscudoPreview()">
       <option value="">Escolha seu time do coração</option>
       <option value="Flamengo">Flamengo</option>
       <option value="Palmeiras">Palmeiras</option>
       <option value="Corinthians">Corinthians</option>
       <!-- Adicione todos os times aqui -->
-    </select><br /><br />
-    <img id="escudoPreview" src="" alt="Prévia do escudo do time" style="display:none" /><br />
+    </select><br><br>
+    <img id="escudoPreview" src="" alt="Prévia do escudo do time"><br>
     <button onclick="salvarCadastro()">Cadastrar</button>
-    <button onclick="mostrarLogin()">Já sou cadastrado - Login</button>
   </div>
 
-  <!-- Tela Login -->
-  <div id="login" class="content hidden">
-    <h2>Login</h2>
-    <input type="text" id="loginNome" placeholder="Seu nome" required /><br /><br />
-    <input type="password" id="loginSenha" placeholder="Senha" required /><br /><br />
-    <button onclick="fazerLogin()">Entrar</button>
-    <button onclick="mostrarCadastro()">Ainda não tenho cadastro</button>
-  </div>
-
-  <!-- Tela Principal após login -->
   <div class="container hidden" id="main">
     <div class="sidebar">
-      <img id="escudoTime" src="" alt="Escudo do time" />
+      <img id="escudoTime" src="" alt="Escudo do time">
       <h2 id="nomeUsuario"></h2>
       <p id="pontuacaoUsuario">Pontuação: 0</p>
       <p id="posicaoRanking">Posição no Ranking: 0º</p>
@@ -139,7 +127,7 @@
 
     function salvarCadastro() {
       const nome = document.getElementById('nome').value.trim();
-      const senha = document.getElementById('senha').value;
+      const senha = document.getElementById('senha').value.trim();
       const time = document.getElementById('time').value;
 
       if (!nome || !senha || !time) {
@@ -152,7 +140,7 @@
         return;
       }
 
-      const usuario = { nome, senha, time, pontuacao: 0, ranking: 0 };
+      const usuario = { nome, senha, time, pontuacao: 0, ranking: 1 };
       usuarios.push(usuario);
       localStorage.setItem('usuarios', JSON.stringify(usuarios));
       localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
@@ -160,54 +148,16 @@
       carregarUsuario();
     }
 
-    function fazerLogin() {
-      const nome = document.getElementById('loginNome').value.trim();
-      const senha = document.getElementById('loginSenha').value;
-
-      if (!nome || !senha) {
-        alert('Preencha todos os campos!');
-        return;
-      }
-
-      const usuario = usuarios.find(user => user.nome.toLowerCase() === nome.toLowerCase());
-      if (!usuario) {
-        alert('Usuário não encontrado!');
-        return;
-      }
-
-      if (usuario.senha !== senha) {
-        alert('Senha incorreta!');
-        return;
-      }
-
-      localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
-      carregarUsuario();
-    }
-
-    function mostrarLogin() {
-      document.getElementById('cadastro').classList.add('hidden');
-      document.getElementById('login').classList.remove('hidden');
-    }
-
-    function mostrarCadastro() {
-      document.getElementById('login').classList.add('hidden');
-      document.getElementById('cadastro').classList.remove('hidden');
-    }
-
     function carregarUsuario() {
       const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
-      if (!usuario) {
-        mostrarCadastro();
-        return;
-      }
+      if (!usuario) return;
 
       document.getElementById('cadastro').classList.add('hidden');
-      document.getElementById('login').classList.add('hidden');
       document.getElementById('main').classList.remove('hidden');
       document.getElementById('nomeUsuario').innerText = usuario.nome;
-      document.getElementById('escudoTime').src = `https://cdn.escudosfc.com.br/images/times/${usuario.time.toLowerCase().replace(/ /g, '_')}.png`;
-      document.getElementById('pontuacaoUsuario').innerText = `Pontuação: ${usuario.pontuacao || 0}`;
-      document.getElementById('posicaoRanking').innerText = `Posição no Ranking: ${usuario.ranking || 0}º`;
+      document.getElementById('escudoTime').src = `escudos/${usuario.time.toLowerCase().replace(/ /g, '_')}.png`;
+      document.getElementById('pontuacaoUsuario').innerText = `${usuario.pontuacao || 0} ptos`;
+      document.getElementById('posicaoRanking').innerText = `${usuario.ranking || 1}ª`;
     }
 
     function mostrarPagina(id) {
@@ -241,23 +191,17 @@
 
     function mostrarEscudoPreview() {
       const time = document.getElementById('time').value;
-      const escudo = document.getElementById('escudoPreview');
+      const img = document.getElementById('escudoPreview');
       if (time) {
-        escudo.src = `https://cdn.escudosfc.com.br/images/times/${time.toLowerCase().replace(/ /g, '_')}.png`;
-        escudo.style.display = 'block';
+        img.src = `escudos/${time.toLowerCase().replace(/ /g, '_')}.png`;
+        img.style.display = 'block';
       } else {
-        escudo.style.display = 'none';
+        img.src = '';
+        img.style.display = 'none';
       }
     }
 
-    window.onload = () => {
-      const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
-      if (usuario) {
-        carregarUsuario();
-      } else {
-        mostrarCadastro();
-      }
-    };
+    window.onload = carregarUsuario;
   </script>
 </body>
 </html>
