@@ -75,6 +75,19 @@
       margin-top: 10px;
       max-height: 80px;
     }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
   </style>
 </head>
 <body>
@@ -90,7 +103,6 @@
       <option value="Flamengo">Flamengo</option>
       <option value="Palmeiras">Palmeiras</option>
       <option value="Corinthians">Corinthians</option>
-      <!-- Adicione todos os times aqui -->
     </select><br><br>
     <img id="escudoPreview" src="" alt="Prévia do escudo do time"><br>
     <button onclick="salvarCadastro()">Cadastrar</button>
@@ -100,8 +112,8 @@
     <div class="sidebar">
       <img id="escudoTime" src="" alt="Escudo do time">
       <h2 id="nomeUsuario"></h2>
-      <p id="pontuacaoUsuario">Pontuação: 0</p>
-      <p id="posicaoRanking">Posição no Ranking: 0º</p>
+      <p id="pontuacaoUsuario"></p>
+      <p id="posicaoRanking"></p>
       <a onclick="mostrarPagina('palpites')">Meus Palpites</a>
       <a onclick="mostrarPagina('resultados')">Meus Resultados</a>
       <a onclick="mostrarPagina('ranking')">Ranking</a>
@@ -117,7 +129,21 @@
       </div>
       <div id="ranking" class="hidden">
         <h2>Ranking</h2>
-        <p>Ranking dos usuários será exibido aqui.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Pos</th>
+              <th>Usuário</th>
+              <th>Pontos Geral</th>
+              <th>Acertos</th>
+              <th>Pontos Rodada</th>
+              <th>Jogos</th>
+            </tr>
+          </thead>
+          <tbody id="rankingTabela">
+            <tr><td colspan="6">Ranking dos usuários será exibido aqui.</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -140,7 +166,7 @@
         return;
       }
 
-      const usuario = { nome, senha, time, pontuacao: 0, ranking: 1 };
+      const usuario = { nome, senha, time, pontuacao: 0, ranking: 1, acertos: 0, pontosRodada: 0, jogos: 0 };
       usuarios.push(usuario);
       localStorage.setItem('usuarios', JSON.stringify(usuarios));
       localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
@@ -156,8 +182,8 @@
       document.getElementById('main').classList.remove('hidden');
       document.getElementById('nomeUsuario').innerText = usuario.nome;
       document.getElementById('escudoTime').src = `escudos/${usuario.time.toLowerCase().replace(/ /g, '_')}.png`;
-      document.getElementById('pontuacaoUsuario').innerText = `${usuario.pontuacao || 0} ptos`;
-      document.getElementById('posicaoRanking').innerText = `${usuario.ranking || 1}ª`;
+      document.getElementById('pontuacaoUsuario').innerText = `${usuario.pontuacao || 0} ptos /`;
+      document.getElementById('posicaoRanking').innerHTML = `Posição no Ranking: ${usuario.ranking || 1}<sup>º</sup>`;
     }
 
     function mostrarPagina(id) {
@@ -167,6 +193,8 @@
         const tabs = document.getElementById('tabsRodadas');
         if (tabs.children.length === 0) criarTabsRodadas();
         tabs.classList.remove('hidden');
+      } else if (id === 'ranking') {
+        atualizarRanking();
       }
     }
 
@@ -199,6 +227,24 @@
         img.src = '';
         img.style.display = 'none';
       }
+    }
+
+    function atualizarRanking() {
+      const rankingBody = document.getElementById('rankingTabela');
+      rankingBody.innerHTML = '';
+      const ordenado = [...usuarios].sort((a, b) => b.pontuacao - a.pontuacao);
+      ordenado.forEach((user, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${user.nome}</td>
+          <td>${user.pontuacao}</td>
+          <td>${user.acertos || 0}</td>
+          <td>${user.pontosRodada || 0}</td>
+          <td>${user.jogos || 0}</td>
+        `;
+        rankingBody.appendChild(tr);
+      });
     }
 
     window.onload = carregarUsuario;
