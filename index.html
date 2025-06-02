@@ -152,20 +152,20 @@
     let usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
     let jogosPorRodada = {};
 
-   async function buscarJogosDaPlanilha() {
-  const resposta = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTJ3xLfoaZYc9tAz1izFxCUVSqjWnIFDJ0i9lZSoaRY0yq311KjGyWe3XbOltQg1QhAEONr0rSxUk5d/pubhtml?gid=0&single=true'); // Substitua pela URL gerada
-  const texto = await resposta.text();
-  const linhas = texto.trim().split('\n');
-  const colunas = linhas.map(l => l.split(','));
+    async function buscarJogosDaPlanilha() {
+      const resposta = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTJ3xLfoaZYc9tAz1izFxCUVSqjWnIFDJ0i9lZSoaRY0yq311KjGyWe3XbOltQg1QhAEONr0rSxUk5d/pubhtml?gid=0&single=true');
+      const texto = await resposta.text();
+      const linhas = texto.trim().split('\n');
+      const colunas = linhas.map(l => l.split(','));
 
-  jogosPorRodada = {};
-  for (let i = 1; i < colunas.length; i++) {
-    const [rodada, data, hora, mandante, visitante] = colunas[i];
-    const jogo = { rodada, data_realizacao: data, hora_realizacao: hora, time_mandante: mandante, time_visitante: visitante };
-    if (!jogosPorRodada[rodada]) jogosPorRodada[rodada] = [];
-    jogosPorRodada[rodada].push(jogo);
-  }
-}
+      jogosPorRodada = {};
+      for (let i = 1; i < colunas.length; i++) {
+        const [rodada, data, hora, mandante, visitante] = colunas[i];
+        const jogo = { rodada, data_realizacao: data, hora_realizacao: hora, time_mandante: mandante, time_visitante: visitante };
+        if (!jogosPorRodada[rodada]) jogosPorRodada[rodada] = [];
+        jogosPorRodada[rodada].push(jogo);
+      }
+    }
 
     function salvarCadastro() {
       const nome = document.getElementById('nome').value.trim();
@@ -276,7 +276,7 @@
     }
 
     window.onload = async () => {
-      await buscarJogosDaAPI();
+      await buscarJogosDaPlanilha();
       carregarUsuario();
     };
   </script>
