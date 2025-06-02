@@ -148,8 +148,20 @@
     </div>
   </div>
 
-  <script>
+  <script defer>
     let usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+    let jogosPorRodada = {};
+
+    async function buscarJogosDaAPI() {
+      const resposta = await fetch('https://script.google.com/macros/s/AKfycbw8vm_CKFsuUYoU2pWvWAZv9no7bbbVx78OIdEThJYnkzpBpACY7ALXjqgQGEYhmetM/exec');
+      const dados = await resposta.json();
+      jogosPorRodada = dados.reduce((acum, jogo) => {
+        const rodada = jogo.rodada || 'Desconhecida';
+        if (!acum[rodada]) acum[rodada] = [];
+        acum[rodada].push(jogo);
+        return acum;
+      }, {});
+    }
 
     function salvarCadastro() {
       const nome = document.getElementById('nome').value.trim();
@@ -183,7 +195,7 @@
       document.getElementById('nomeUsuario').innerText = usuario.nome;
       document.getElementById('escudoTime').src = `escudos/${usuario.time.toLowerCase().replace(/ /g, '_')}.png`;
       document.getElementById('pontuacaoUsuario').innerText = `${usuario.pontuacao || 0} ptos /`;
-      document.getElementById('posicaoRanking').innerHTML = `Posição no Ranking: ${usuario.ranking || 1}<sup>º</sup>`;
+      document.getElementById('posicaoRanking').innerHTML = `${usuario.ranking || 1}<sup>ª</sup>`;
     }
 
     function mostrarPagina(id) {
@@ -214,7 +226,19 @@
     function selecionarRodada(rodada, btn) {
       document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      document.getElementById('jogosRodada').innerHTML = `<h3>Jogos da Rodada ${rodada}</h3><p>Jogos ainda não cadastrados.</p>`;
+
+      const jogos = jogosPorRodada[rodada] || [];
+      const container = document.getElementById('jogosRodada');
+      container.innerHTML = `<h3>Jogos da Rodada ${rodada}</h3>`;
+      if (jogos.length === 0) {
+        container.innerHTML += '<p>Jogos ainda não cadastrados.</p>';
+      } else {
+        jogos.forEach(jogo => {
+          const div = document.createElement('div');
+          div.innerHTML = `${jogo.data_realizacao} - ${jogo.hora_realizacao} - ${jogo.time_mandante} x ${jogo.time_visitante}`;
+          container.appendChild(div);
+        });
+      }
     }
 
     function mostrarEscudoPreview() {
@@ -247,7 +271,10 @@
       });
     }
 
-    window.onload = carregarUsuario;
+    window.onload = async () => {
+      await buscarJogosDaAPI();
+      carregarUsuario();
+    };
   </script>
 </body>
 </html>
