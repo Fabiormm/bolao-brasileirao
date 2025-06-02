@@ -152,16 +152,20 @@
     let usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
     let jogosPorRodada = {};
 
-    async function buscarJogosDaAPI() {
-      const resposta = await fetch('https://script.google.com/macros/s/AKfycbw8vm_CKFsuUYoU2pWvWAZv9no7bbbVx78OIdEThJYnkzpBpACY7ALXjqgQGEYhmetM/exec');
-      const dados = await resposta.json();
-      jogosPorRodada = dados.reduce((acum, jogo) => {
-        const rodada = jogo.rodada || 'Desconhecida';
-        if (!acum[rodada]) acum[rodada] = [];
-        acum[rodada].push(jogo);
-        return acum;
-      }, {});
-    }
+   async function buscarJogosDaPlanilha() {
+  const resposta = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTJ3xLfoaZYc9tAz1izFxCUVSqjWnIFDJ0i9lZSoaRY0yq311KjGyWe3XbOltQg1QhAEONr0rSxUk5d/pubhtml?gid=0&single=true'); // Substitua pela URL gerada
+  const texto = await resposta.text();
+  const linhas = texto.trim().split('\n');
+  const colunas = linhas.map(l => l.split(','));
+
+  jogosPorRodada = {};
+  for (let i = 1; i < colunas.length; i++) {
+    const [rodada, data, hora, mandante, visitante] = colunas[i];
+    const jogo = { rodada, data_realizacao: data, hora_realizacao: hora, time_mandante: mandante, time_visitante: visitante };
+    if (!jogosPorRodada[rodada]) jogosPorRodada[rodada] = [];
+    jogosPorRodada[rodada].push(jogo);
+  }
+}
 
     function salvarCadastro() {
       const nome = document.getElementById('nome').value.trim();
