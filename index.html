@@ -153,7 +153,7 @@
     let jogosPorRodada = {};
 
     async function buscarJogosDaPlanilha() {
-      const resposta = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTJ3xLfoaZYc9tAz1izFxCUVSqjWnIFDJ0i9lZSoaRY0yq311KjGyWe3XbOltQg1QhAEONr0rSxUk5d/pubhtml?gid=0&single=true');
+      const resposta = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1v.../pub?output=csv');
       const texto = await resposta.text();
       const linhas = texto.trim().split('\n');
       const colunas = linhas.map(l => l.split(','));
